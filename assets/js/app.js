@@ -31,8 +31,8 @@ var chosenXAxis = "poverty";
 function xScale(censusData, chosenXAxis) {
   // create scales
   var xLinearScale = d3.scaleLinear()
-    .domain([d3.min(censusData, d => d[chosenXAxis]) * 0.8,
-      d3.max(censusData, d => d[chosenXAxis]) * 1.2
+    .domain([d3.min(censusData, d => d[chosenXAxis]) * 0.9,
+      d3.max(censusData, d => d[chosenXAxis]) * 1.1
     ])
     .range([0, width]);
 
@@ -68,8 +68,11 @@ function updateToolTip(chosenXAxis, circlesGroup) {
   if (chosenXAxis === "poverty") {
     var label = "Poverty:";
   }
+  else if (chosenXAxis === "age"){
+      var label = "Age:";
+  }
   else {
-    var label = "Age:";
+    var label = "Income:";
   }
 
   var toolTip = d3.tip()
@@ -99,8 +102,9 @@ d3.csv("assets/data/data.csv", function(err, censusData) {
   // parse data
   censusData.forEach(function(data) {
     data.poverty = +data.poverty;
-    data.healthcare = +data.healthcare;
     data.age = +data.age;
+    data.income = +data.income;
+    data.healthcare = +data.healthcare;
   });
 
   // xLinearScale function above csv import
@@ -136,6 +140,20 @@ d3.csv("assets/data/data.csv", function(err, censusData) {
     .attr("fill", "lightblue")
     .attr("opacity", ".5");
 
+//   // append text to circles
+//   var textGroup = chartGroup.selectAll("text")
+//     .data(censusData)
+//     .enter()
+//     .append("text")
+//     .attr("x", d => xLinearScale(d[chosenXAxis]))
+//     .attr("y", d => yLinearScale(d.healthcare))
+//     .text(d => d.abbr)
+//     // .attr("text-anchor"="middle")
+//     .attr("font-family", "sans-serif")
+//     .attr("font-size", "10px")
+//     .attr("fill", "white")
+//     .attr("opacity", ".9");
+
   // Create group for  2 x- axis labels
   var labelsGroup = chartGroup.append("g")
     .attr("transform", `translate(${width / 2}, ${height + 20})`);
@@ -154,6 +172,14 @@ d3.csv("assets/data/data.csv", function(err, censusData) {
     .classed("inactive", true)
     .text("Age(Median)");
 
+  var incomeLabel = labelsGroup.append("text")
+    .attr("x", 0)
+    .attr("y", 60)
+    .attr("value", "income") // value to grab for event listener
+    .classed("inactive", true)
+    .text("Household Income(Median)");
+
+    
   // append y axis
   chartGroup.append("text")
     .attr("transform", "rotate(-90)")
@@ -196,17 +222,35 @@ d3.csv("assets/data/data.csv", function(err, censusData) {
           ageLabel
             .classed("active", true)
             .classed("inactive", false);
+          incomeLabel
+            .classed("active", false)
+            .classed("inactive", true);
           povertyLabel
             .classed("active", false)
             .classed("inactive", true);
         }
-        else {
+        else if (chosenXAxis === "income"){
+          incomeLabel
+            .classed("active", true)
+            .classed("inactive", false);
           ageLabel
             .classed("active", false)
             .classed("inactive", true);
           povertyLabel
+            .classed("active", false)
+            .classed("inactive", true);
+
+        }
+        else {
+          povertyLabel
             .classed("active", true)
             .classed("inactive", false);
+          ageLabel
+            .classed("active", false)
+            .classed("inactive", true);
+          incomeLabel
+            .classed("active", false)
+            .classed("inactive", true);
         }
       }
     });
